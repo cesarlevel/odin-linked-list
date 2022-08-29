@@ -8,7 +8,6 @@ class Node {
 class LinkedList {
     constructor(head = null) {
         this.head = head;
-        this.listSize = this.head ? 1 : 0;
     }
 
     append(value) {
@@ -24,7 +23,6 @@ class LinkedList {
         }
 
         pointer.next = new Node(value);
-        this.listSize++;
     }
 
     prepend(value) {
@@ -32,32 +30,33 @@ class LinkedList {
             this.head = new Node(value);
             return;
         }
-        
+
         this.head = new Node(value, this.head);
-        this.listSize++;
     }
 
     at(index) {
-        let atIndexNode = this.head;
+        if (index >= this.getSize || index < 0 || isNaN(index)) throw new Error ('Invalid index');
+
+        let pointer = this.head;
 
         for (let i = 0; i <= index - 1; i++) {
-            atIndexNode = atIndexNode?.next || null;
+            pointer = pointer?.next || undefined;
         }
 
-        return atIndexNode;
+        return pointer;
     }
 
     pop() {
-        if (!this.listSize) return undefined;
-        if (this.listSize === 1) {
+        const size = this.getSize;
+
+        if (!size) return undefined;
+        if (size === 1) {
             this.head = null;
-            this.listSize--;
             return;
         }
-
-        const newTailNode = this.at(this.listSize - 2);
-        newTailNode.next = null;
-        this.listSize--;
+        
+        const tailPointer = this.at(this.getSize - 2);
+        tailPointer.next = null;
     }
 
     contains(value) {
@@ -105,37 +104,22 @@ class LinkedList {
     }
 
     insertAt(value, index) {
-        if (index === this.listSize) return null;
-
-        let pointer = this.at(index - 1);
-
         if (index === 0) {
             this.prepend(value);
-            return;
+        } else {
+            let pointer = this.at(index - 1);
+            pointer.next = new Node(value, pointer.next);
         }
-
-        pointer.next = new Node(value, pointer.next);
-
-        this.listSize++;
     }
 
     removeAt(index) {
-        if (index === this.listSize) return null;
-
-        let pointer = this.at(index - 1);
-        let nextPointer = this.at(index);
-
         if (index === 0) {
             this.head = this.head.next;
         } else {
+            let pointer = this.at(index - 1);
+            let nextPointer = this.at(index);
             pointer.next = nextPointer.next;
         }
-
-        this.listSize--;
-    }
-
-    get size() {
-        return this.listSize;
     }
 
     get getHead() {
@@ -151,6 +135,20 @@ class LinkedList {
 
         return pointer;
     }
+
+    get getSize() {
+        let counter = this.head ? 1 : 0;
+        let pointer = this.head;
+
+        if (!this.head) return 0;
+
+        while (pointer.next) {
+            pointer = pointer.next;
+            counter++;
+        }
+
+        return counter;
+    }
 }
 
 const firstNode = new Node('first');
@@ -160,12 +158,13 @@ list.append('second');
 list.append('forth');
 list.prepend('zero');
 list.insertAt('third', 3);
-list.insertAt('-1', 0);
+list.insertAt('minus', 0);
 list.append('fifth');
 list.pop();
 list.insertAt('third and half', 5);
 list.removeAt(5);
 list.removeAt(0);
+console.log(list.getSize)
 
 let showList = document.createElement('h1');
 showList.style.textAlign = 'center';
